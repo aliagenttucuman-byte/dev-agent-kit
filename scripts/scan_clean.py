@@ -125,6 +125,65 @@ def scan_text(path, rel, text):
                     break
                 findings.append(Finding(rel, i, "hardcoded-port", port, f"puerto personal hardcodeado {port}"))
                 break
+    findings.extend(check_corrupted_chars(rel, lines))
+    return findings
+
+
+# Caracteres fuera del rango latino habitual que son casi siempre basura:
+# ideogramas CJK, hangul, kana, cirílico, presentation forms y el bloque
+# de diagramas. El arbol ASCII con caracteres de caja (U+2500 y familia) si
+# esta permitido: se usa para dibujar estructuras de carpetas.
+_ALLOWED_BOX_CHARS = set(
+    "─│├└┌┐┘┬┴┼"
+    "━┃┏┓┗┛┣┫┳┻╋"
+    "═║╔╗╚╝╠╣╦╩╬"
+    "▸▾◂◃►"
+    "•●○◦▪▫"
+    "✓✔✗✘"
+    "→←↑↓↔⇒⇐"
+    "…—–"
+    "‘’“”"
+)
+
+
+def check_corrupted_chars(rel, lines):
+    """Detecta caracteres corruptos: CJK, cirilico y otros alfabetos no esperados.
+
+    Sin este check, un ideograma colado por autocompletado pasa el build y
+    llega al cliente. Se permite el set de dibujo de cajas para los arboles
+    de estructura de carpetas.
+    """
+    findings = []
+    for i, line in enumerate(lines, 1):
+        for ch in line:
+            cp = ord(ch)
+            if cp < 128:
+                continue
+            if ch in _ALLOWED_BOX_CHARS:
+                continue
+            # Latin-1 supplement y latino extendido: tildes, enye, dieresis.
+            if 0x00A0 <= cp <= 0x024F:
+                continue
+            # Simbolos comunes y punctuation Unicode util.
+            if 0x2000 <= cp <= 0x206F:
+                continue
+            if 0x20A0 <= cp <= 0x20BF:
+                continue
+            if 0x2100 <= cp <= 0x214F:
+                continue
+            # Emoji: no aportan nada en documentacion tecnica.
+            if 0x1F300 <= cp <= 0x1FAFF:
+                findings.append(Finding(
+                    rel, i, "corrupted-char", f"U+{cp:04X}",
+                    f"caracter no permitido (emoji o pictograma): U+{cp:04X}",
+                ))
+                break
+            # Todo lo demas (CJK, hangul, kana, cirilico, presentation forms).
+            findings.append(Finding(
+                rel, i, "corrupted-char", f"U+{cp:04X}",
+                f"caracter fuera del alfabeto esperado (posible corrupcion): U+{cp:04X} {ch!r}",
+            ))
+            break
     return findings
 
 

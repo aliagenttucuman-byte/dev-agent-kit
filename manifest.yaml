@@ -68,6 +68,22 @@ skills:
     area: engineering
     summary: "Stack backend estandar: API, ORM, migraciones, estructura."
     profiles: [standard, full]
+  - name: dev-kit-python-tooling
+    area: engineering
+    summary: "Tooling de Python: pyproject, entornos, ruff, mypy, pyright, packaging y CI."
+    profiles: [standard, full]
+  - name: dev-kit-python-async
+    area: engineering
+    summary: "Programacion asincrona en Python: TaskGroup, cancelacion, timeouts y concurrencia."
+    profiles: [standard, full]
+  - name: dev-kit-react-testing
+    area: engineering
+    summary: "Testing de React: Vitest, Testing Library, MSW y Playwright."
+    profiles: [standard, full]
+  - name: dev-kit-react-architecture
+    area: engineering
+    summary: "Arquitectura de React: features, estado de servidor, RSC y code splitting."
+    profiles: [standard, full]
   - name: dev-kit-database
     area: engineering
     summary: "Patrones de base de datos, modelado e indices."
@@ -96,18 +112,6 @@ skills:
     area: engineering
     summary: "Code review con checklist y severidad."
     profiles: [standard, full]
-  - name: dev-kit-rag-pipeline
-    area: vertical
-    summary: "Pipeline de RAG: chunking, embeddings, retrieval, evaluacion."
-    profiles: [full]
-  - name: dev-kit-browser-agent
-    area: vertical
-    summary: "Agente de navegador para scraping y QA exploratorio."
-    profiles: [full]
-  - name: dev-kit-document-processing
-    area: vertical
-    summary: Extraccion y limpieza de texto desde PDF, Word y Markdown.
-    profiles: [full]
 
 profiles:
   minimal:
@@ -135,6 +139,10 @@ profiles:
     - dev-kit-frontend-stack
     - dev-kit-backend-stack
     - dev-kit-database
+    - dev-kit-python-tooling
+    - dev-kit-python-async
+    - dev-kit-react-testing
+    - dev-kit-react-architecture
     - dev-kit-security
     - dev-kit-ci-cd
     - dev-kit-observability
@@ -156,6 +164,10 @@ profiles:
     - dev-kit-code-quality
     - dev-kit-frontend-stack
     - dev-kit-backend-stack
+    - dev-kit-python-tooling
+    - dev-kit-python-async
+    - dev-kit-react-testing
+    - dev-kit-react-architecture
     - dev-kit-database
     - dev-kit-security
     - dev-kit-ci-cd
@@ -163,6 +175,3 @@ profiles:
     - dev-kit-documentation
     - dev-kit-testing
     - dev-kit-review
-    - dev-kit-rag-pipeline
-    - dev-kit-browser-agent
-    - dev-kit-document-processing

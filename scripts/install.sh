@@ -13,6 +13,29 @@ PROFILE="standard"
 DRY_RUN=0
 FORCE=0
 
+# Las skills viven en el repo hermano dev-agent-skills, no en este repo.
+# El kit es el tooling; el activo vendible es la biblioteca de skills.
+# Se resuelve por:
+#   1. variable de entorno SKILLS_SRC
+#   2. repo hermano ../dev-agent-skills/skills
+#   3. fallback a <repo>/skills (instalacion monorepo)
+SKILLS_SRC="${SKILLS_SRC:-}"
+
+if [[ -z "$SKILLS_SRC" ]]; then
+  for candidato in "$REPO_ROOT/../dev-agent-skills/skills" "$REPO_ROOT/skills"; do
+    if [[ -d "$candidato" ]]; then
+      SKILLS_SRC="$(cd "$candidato" && pwd)"
+      break
+    fi
+  done
+fi
+
+if [[ -z "$SKILLS_SRC" || ! -d "$SKILLS_SRC" ]]; then
+  echo "ERROR: no se encontro el directorio de skills." >&2
+  echo "  Buscado: \$SKILLS_SRC, $REPO_ROOT/../dev-agent-skills/skills, $REPO_ROOT/skills" >&2
+  exit 2
+fi
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --target) TARGET="$2"; shift 2 ;;
@@ -29,8 +52,8 @@ case "$PROFILE" in
   *) echo "Perfil invalido: $PROFILE (minimal|standard|full)" >&2; exit 2 ;;
 esac
 
-if [[ ! -d "$REPO_ROOT/skills" ]]; then
-  echo "ERROR: no existe $REPO_ROOT/skills" >&2
+if [[ ! -d "$SKILLS_SRC" ]]; then
+  echo "ERROR: no existe $SKILLS_SRC" >&2
   exit 2
 fi
 
@@ -73,7 +96,7 @@ if [[ ${#SKILL_LIST[@]} -eq 0 ]]; then
 fi
 
 echo "Instalador Dev Agent Kit"
-echo "  origen : $REPO_ROOT/skills"
+echo "  origen : $SKILLS_SRC"
 echo "  destino: $TARGET"
 echo "  perfil : $PROFILE ($(( ${#SKILL_LIST[@]} )) skills)"
 
@@ -83,7 +106,7 @@ SKIPPED=0
 MISSING=0
 
 for skill in "${SKILL_LIST[@]}"; do
-  src="$REPO_ROOT/skills/$skill"
+  src="$SKILLS_SRC/$skill"
   dst="$TARGET/$skill"
   if [[ ! -d "$src" ]]; then
     echo "  FALTA   $skill (no existe en el repo)"
