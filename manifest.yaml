@@ -16,6 +16,10 @@ skills:
     area: methodology
     summary: Flujo SDD de 9 fases con artefacto verificable por fase.
     profiles: [minimal, standard, full]
+  - name: dev-kit-hermes-bootstrap
+    area: devops
+    summary: "Levantar y configurar el runtime de agentes en Linux, macOS y Windows."
+    profiles: [minimal, standard, full]
   - name: dev-kit-project-constitution
     area: methodology
     summary: Principios fundacionales del proyecto antes de codear.
@@ -116,6 +120,7 @@ skills:
 profiles:
   minimal:
     - dev-kit-sdd-workflow
+    - dev-kit-hermes-bootstrap
     - dev-kit-project-constitution
     - dev-kit-spec-authoring
     - dev-kit-backlog-tickets
@@ -125,6 +130,7 @@ profiles:
     - dev-kit-task-breakdown
   standard:
     - dev-kit-sdd-workflow
+    - dev-kit-hermes-bootstrap
     - dev-kit-project-constitution
     - dev-kit-spec-authoring
     - dev-kit-backlog-tickets
@@ -138,11 +144,11 @@ profiles:
     - dev-kit-code-quality
     - dev-kit-frontend-stack
     - dev-kit-backend-stack
-    - dev-kit-database
     - dev-kit-python-tooling
     - dev-kit-python-async
     - dev-kit-react-testing
     - dev-kit-react-architecture
+    - dev-kit-database
     - dev-kit-security
     - dev-kit-ci-cd
     - dev-kit-observability
@@ -151,6 +157,7 @@ profiles:
     - dev-kit-review
   full:
     - dev-kit-sdd-workflow
+    - dev-kit-hermes-bootstrap
     - dev-kit-project-constitution
     - dev-kit-spec-authoring
     - dev-kit-backlog-tickets
