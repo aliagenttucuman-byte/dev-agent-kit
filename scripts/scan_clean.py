@@ -29,8 +29,18 @@ sys.path.insert(0, str(Path(__file__).parent))
 from forbidden_terms import (  # noqa: E402
     FORBIDDEN_PATH_PATTERNS,
     FORBIDDEN_PORTS,
-    FORBIDDEN_TERMS,
+    etiqueta_segura,
+    iter_forbidden,
 )
+
+
+def _resolver_hash(etiqueta: str) -> str:
+    """Devuelve el termino real de una etiqueta 'privado#hash'. '' si no existe."""
+    if not etiqueta.startswith("privado#"):
+        return ""
+    from forbidden_terms import LOCAL_TOKEN_MAP  # noqa: PLC0415
+
+    return LOCAL_TOKEN_MAP.get(etiqueta.split("#", 1)[1], "")
 
 SKIP_DIRS = {
     ".git", "node_modules", "__pycache__", ".venv", "venv", "dist", "build",
@@ -86,7 +96,7 @@ def scan_text(path, rel, text):
     findings = []
     self_exempt = rel in SELF_EXEMPT
     lines = text.splitlines()
-    for term, case_sensitive, allowlist in FORBIDDEN_TERMS:
+    for term, case_sensitive, allowlist in iter_forbidden():
         # Limites de palabra: sin esto "Alma" matchea "Almacenamiento" y
         # "Nico" matchea "tecnico". Un scanner con falsos positivos pierde
         # autoridad: hay que reportar solo lo que de verdad esta.
@@ -106,9 +116,11 @@ def scan_text(path, rel, text):
             # El propio archivo forbidden_terms.py y los scripts de scan se auto-declaran
             if self_exempt:
                 break
+            # Los terminos de la denylist PRIVADA se reportan por hash: el log
+            # de CI es publico y no puede revelar el nombre del cliente.
             findings.append(Finding(
-                rel, i, "forbidden-term", term,
-                f"termino prohibido '{term}' (case_sensitive={case_sensitive})",
+                rel, i, "forbidden-term", etiqueta_segura(term),
+                f"termino prohibido '{etiqueta_segura(term)}' (case_sensitive={case_sensitive})",
             ))
             break  # una vez por archivo y termino basta
     for pat in FORBIDDEN_PATH_PATTERNS:
@@ -241,6 +253,15 @@ def main():
     ap.add_argument("paths", nargs="*", default=None)
     ap.add_argument("--strict", action="store_true")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument(
+        "--private-labels",
+        action="store_true",
+        help=(
+            "Muestra el nombre real de los terminos de la denylist privada. "
+            "Solo para uso local: el log de CI es publico y no debe revelar "
+            "el nombre del cliente. El default (hash) es el seguro."
+        ),
+    )
     args = ap.parse_args()
 
     repo_root = Path(__file__).resolve().parent.parent
@@ -274,6 +295,16 @@ def main():
         findings.extend(scan_text(path, rel, text))
         check_frontmatter(path, rel, text, findings)
         check_broken_pointers(path, rel, text, findings)
+
+    # Con --private-labels se revela el nombre real de los terminos privados.
+    # El default los deja como hash: el log de CI es publico.
+    if args.private_labels:
+        for f in findings:
+            if f.kind == "forbidden-term" and f.token.startswith("privado#"):
+                real = _resolver_hash(f.token)
+                if real:
+                    f.token = real
+                    f.message = f"termino prohibido '{real}'"
 
     errors = [f for f in findings if f.kind in ("forbidden-term", "absolute-path", "hardcoded-port", "frontmatter", "broken-pointer")]
     if args.json:

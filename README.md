@@ -33,7 +33,7 @@ dev-agent-kit/
 │   │   ├── templates/       # artefactos copiables
 │   │   └── scripts/         # verificadores ejecutables
 ├── scripts/
-│   ├── forbidden_terms.py   # lista unica de terminos prohibidos
+│   ├── forbidden_terms.py   # reglas publicas de genericidad
 │   ├── scan_clean.py        # verificador de genericidad (CI)
 │   ├── install.sh           # instala el kit en un runtime
 │   └── smoke_test.sh        # prueba de instalacion limpia
@@ -120,6 +120,43 @@ produce. El agente no avanza de fase sin el artefacto.
 Si una skill menciona un cliente, una persona o una ruta concreta, no entra.
 Si aporta un patron reusable, entra. La destilacion es parte del trabajo, no
 un extra.
+
+### Denylist privada (opcional)
+
+El repo es publico, asi que **no puede contener la lista de terminos
+prohibidos**: seria tan sensible como los terminos que prohibe. En su lugar:
+
+- `scripts/forbidden_terms.py` publica **reglas estructurales** que detectan la
+  clase de contaminacion sin nombrar a nadie: rutas de maquina concreta,
+  dominios de empresa, hosts personales.
+- Los terminos concretos se cargan de una **denylist local**, que no se
+  versiona:
+
+```bash
+mkdir -p ~/.config/dev-agent-kit
+cat > ~/.config/dev-agent-kit/denylist.local.json <<'JSON'
+{
+  "version": 1,
+  "terms": [
+    {"term": "NombreDeCliente", "case_sensitive": false, "allow": []},
+    {"term": "MarcaPersonal", "case_sensitive": true, "allow": [" DB"]}
+  ]
+}
+JSON
+```
+
+Tambien se puede ubicar con la variable `DEVKIT_DENYLIST`.
+
+**Privacidad en los logs:** cuando el scanner detecta un termino de la denylist
+privada, lo reporta por **hash** (`privado#8d2a6a7c54`), no por nombre: el log
+de CI es publico. Para ver el nombre real en uso local:
+
+```bash
+python3 scripts/scan_clean.py --private-labels
+```
+
+Con esto, el repo se puede publicar y auditar sin filtrar nada, y la deteccion
+sigue siendo completa.
 
 ---
 

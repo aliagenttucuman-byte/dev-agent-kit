@@ -28,13 +28,21 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-# La misma lista de terminos prohibidos que usa el scanner de genericidad.
-# Si una huella contiene uno, se redacta: la huella es el aprendizaje, no el dato.
+# Las mismas reglas de genericidad que usa el scanner. Si una huella contiene
+# un termino de la denylist privada, se redacta por hash: la huella es el
+# aprendizaje, no el dato. Y el nombre del cliente no queda en el archivo.
 try:
     sys.path.insert(0, str(Path(__file__).parent))
-    from forbidden_terms import FORBIDDEN_TERMS  # type: ignore
+    from forbidden_terms import (  # type: ignore
+        etiqueta_segura,
+        iter_forbidden,
+    )
 except Exception:  # noqa: BLE001
-    FORBIDDEN_TERMS = []
+    def iter_forbidden() -> list:  # type: ignore
+        return []
+
+    def etiqueta_segura(termino: str) -> str:  # type: ignore
+        return termino
 
 # Patrones que sugieren contenido de cliente. Se redactan, no se bloquean.
 SENSITIVE_PATTERNS = [
@@ -49,18 +57,23 @@ SENSITIVE_PATTERNS = [
 
 def redact_forbidden(text: str) -> tuple[str, bool]:
     """Redacta terminos de cliente / marca personal. Devuelve (texto, hubo_match)."""
-    if not text or not FORBIDDEN_TERMS:
+    terminos = iter_forbidden()
+    if not text or not terminos:
         return text, False
     flagged = False
     out = text
-    for term, case_sensitive, allowlist in FORBIDDEN_TERMS:
+    for term, case_sensitive, allowlist in terminos:
         if len(term.strip()) < 3:
             continue
         flags = 0 if case_sensitive else re.IGNORECASE
         pattern = re.compile(re.escape(term), flags)
 
-        def _sub(m, _term=term):
-            return f"<cliente:{_term.strip()}>"
+        # La etiqueta es el termino real, o su hash si viene de la denylist
+        # privada. Nunca queda el nombre del cliente en la huella.
+        etiqueta = etiqueta_segura(term)
+
+        def _sub(m, _etiqueta=etiqueta):
+            return f"<cliente:{_etiqueta}>"
 
         new_out, n = pattern.subn(_sub, out)
         if n:
@@ -132,6 +145,7 @@ def build_record(args) -> dict:
         flagged = flagged or flagged2
     else:
         rec.update({"tipo": "nota", "nota": ""})
+        flagged = False
 
     if flagged:
         rec["requiere_revision"] = True
