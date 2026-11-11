@@ -1,0 +1,168 @@
+name: dev-agent-kit
+version: 0.1.0
+description: "Kit generico de agentes de IA para desarrollo de software: metodologia SDD, roster de agentes, estandares de ingenieria, instalador y auditor de genericidad. Sin datos de cliente ni rutas de maquinas concretas."
+license: MIT
+created: "2026-11-11"
+
+# ---------------------------------------------------------------------------
+# Inventario de skills del kit.
+#
+# Cada skill vive en skills/<nombre>/ con SKILL.md + references/ + templates/ + scripts/.
+# El perfil determina que se instala. 'minimal' es el spine de metodologia.
+# ---------------------------------------------------------------------------
+
+skills:
+  - name: dev-kit-sdd-workflow
+    area: methodology
+    summary: Flujo SDD de 9 fases con artefacto verificable por fase.
+    profiles: [minimal, standard, full]
+  - name: dev-kit-project-constitution
+    area: methodology
+    summary: Principios fundacionales del proyecto antes de codear.
+    profiles: [minimal, standard, full]
+  - name: dev-kit-spec-authoring
+    area: methodology
+    summary: Escritura de contratos OpenAPI y user stories.
+    profiles: [minimal, standard, full]
+  - name: dev-kit-backlog-tickets
+    area: methodology
+    summary: "Conversion de material crudo en backlog jerarquico de historias."
+    profiles: [minimal, standard, full]
+  - name: dev-kit-spec-analysis
+    area: methodology
+    summary: "Coherencia spec -> plan -> estimacion; deteccion de gaps y over-engineering."
+    profiles: [minimal, standard, full]
+  - name: dev-kit-cost-estimation
+    area: methodology
+    summary: Estimacion de costos de infra, LLM y equipo antes de implementar.
+    profiles: [minimal, standard, full]
+  - name: dev-kit-project-bootstrap
+    area: methodology
+    summary: "Scaffold de proyecto nuevo desde cero con el stack estandar."
+    profiles: [minimal, standard, full]
+  - name: dev-kit-task-breakdown
+    area: methodology
+    summary: Conversion de plan en tareas asignables a agentes.
+    profiles: [minimal, standard, full]
+  - name: dev-kit-agent-team
+    area: agents
+    summary: "Roster de agentes, roles, limites de responsabilidad y reglas de handoff."
+    profiles: [standard, full]
+  - name: dev-kit-agent-routing
+    area: agents
+    summary: Routing declarativo goal -> agente con scoring y fallback.
+    profiles: [standard, full]
+  - name: dev-kit-orchestrator
+    area: agents
+    summary: Loop de orquestacion, estados, reintentos y politica de escalamiento.
+    profiles: [standard, full]
+  - name: dev-kit-code-quality
+    area: engineering
+    summary: Estandares de codigo, linting, type hints y gates de calidad.
+    profiles: [standard, full]
+  - name: dev-kit-frontend-stack
+    area: engineering
+    summary: Stack frontend estandar y convenciones.
+    profiles: [standard, full]
+  - name: dev-kit-backend-stack
+    area: engineering
+    summary: "Stack backend estandar: API, ORM, migraciones, estructura."
+    profiles: [standard, full]
+  - name: dev-kit-database
+    area: engineering
+    summary: "Patrones de base de datos, modelado e indices."
+    profiles: [standard, full]
+  - name: dev-kit-security
+    area: engineering
+    summary: Baseline de seguridad para aplicaciones y agentes.
+    profiles: [standard, full]
+  - name: dev-kit-ci-cd
+    area: engineering
+    summary: Pipeline de CI/CD con gates de calidad y despliegue.
+    profiles: [standard, full]
+  - name: dev-kit-observability
+    area: engineering
+    summary: Logging estructurado, metricas y health checks.
+    profiles: [standard, full]
+  - name: dev-kit-documentation
+    area: engineering
+    summary: README, ADRs y documentacion viva de proyecto.
+    profiles: [standard, full]
+  - name: dev-kit-testing
+    area: engineering
+    summary: Estrategia de tests unitarios, integracion y e2e.
+    profiles: [standard, full]
+  - name: dev-kit-review
+    area: engineering
+    summary: "Code review con checklist y severidad."
+    profiles: [standard, full]
+  - name: dev-kit-rag-pipeline
+    area: vertical
+    summary: "Pipeline de RAG: chunking, embeddings, retrieval, evaluacion."
+    profiles: [full]
+  - name: dev-kit-browser-agent
+    area: vertical
+    summary: "Agente de navegador para scraping y QA exploratorio."
+    profiles: [full]
+  - name: dev-kit-document-processing
+    area: vertical
+    summary: Extraccion y limpieza de texto desde PDF, Word y Markdown.
+    profiles: [full]
+
+profiles:
+  minimal:
+    - dev-kit-sdd-workflow
+    - dev-kit-project-constitution
+    - dev-kit-spec-authoring
+    - dev-kit-backlog-tickets
+    - dev-kit-spec-analysis
+    - dev-kit-cost-estimation
+    - dev-kit-project-bootstrap
+    - dev-kit-task-breakdown
+  standard:
+    - dev-kit-sdd-workflow
+    - dev-kit-project-constitution
+    - dev-kit-spec-authoring
+    - dev-kit-backlog-tickets
+    - dev-kit-spec-analysis
+    - dev-kit-cost-estimation
+    - dev-kit-project-bootstrap
+    - dev-kit-task-breakdown
+    - dev-kit-agent-team
+    - dev-kit-agent-routing
+    - dev-kit-orchestrator
+    - dev-kit-code-quality
+    - dev-kit-frontend-stack
+    - dev-kit-backend-stack
+    - dev-kit-database
+    - dev-kit-security
+    - dev-kit-ci-cd
+    - dev-kit-observability
+    - dev-kit-documentation
+    - dev-kit-testing
+    - dev-kit-review
+  full:
+    - dev-kit-sdd-workflow
+    - dev-kit-project-constitution
+    - dev-kit-spec-authoring
+    - dev-kit-backlog-tickets
+    - dev-kit-spec-analysis
+    - dev-kit-cost-estimation
+    - dev-kit-project-bootstrap
+    - dev-kit-task-breakdown
+    - dev-kit-agent-team
+    - dev-kit-agent-routing
+    - dev-kit-orchestrator
+    - dev-kit-code-quality
+    - dev-kit-frontend-stack
+    - dev-kit-backend-stack
+    - dev-kit-database
+    - dev-kit-security
+    - dev-kit-ci-cd
+    - dev-kit-observability
+    - dev-kit-documentation
+    - dev-kit-testing
+    - dev-kit-review
+    - dev-kit-rag-pipeline
+    - dev-kit-browser-agent
+    - dev-kit-document-processing
