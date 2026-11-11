@@ -87,8 +87,15 @@ def scan_text(path, rel, text):
     self_exempt = rel in SELF_EXEMPT
     lines = text.splitlines()
     for term, case_sensitive, allowlist in FORBIDDEN_TERMS:
-        needle = re.escape(term)
-        pattern = re.compile(needle if case_sensitive else needle, re.IGNORECASE if not case_sensitive else 0)
+        # Limites de palabra: sin esto "Alma" matchea "Almacenamiento" y
+        # "Nico" matchea "tecnico". Un scanner con falsos positivos pierde
+        # autoridad: hay que reportar solo lo que de verdad esta.
+        core = term.strip()
+        if core and (core[0].isalnum() or core[0] == "_"):
+            needle = r"\b" + re.escape(core) + r"\b"
+        else:
+            needle = re.escape(core)
+        pattern = re.compile(needle, 0 if case_sensitive else re.IGNORECASE)
         for i, line in enumerate(lines, 1):
             m = pattern.search(line)
             if not m:
@@ -114,6 +121,8 @@ def scan_text(path, rel, text):
     for port in FORBIDDEN_PORTS:
         for i, line in enumerate(lines, 1):
             if re.search(rf"(?<!\d){port}(?!\d)", line):
+                if self_exempt:
+                    break
                 findings.append(Finding(rel, i, "hardcoded-port", port, f"puerto personal hardcodeado {port}"))
                 break
     return findings
@@ -149,11 +158,13 @@ def check_frontmatter(path, rel, text, findings):
             f"name='{name}' != directorio '{path.parent.name}'",
         ))
     desc = data.get("description")
-    if isinstance(desc, str) and ": " in desc and not (
-        desc.startswith('"') or desc.startswith("'")
-    ):
-        findings.append(Finding(rel, 1, "frontmatter", "description",
-                                "description sin comillas y contiene ': ' (YAML rompe)"))
+    if isinstance(desc, str):
+        # El chequeo real es que YAML haya parseado: si "description" tiene
+        # ': ' adentro pero esta entre comillas, YAML lo resuelve bien.
+        # Solo es error si el YAML no parseo (ya verificado arriba).
+        if not desc.strip():
+            findings.append(Finding(rel, 1, "frontmatter", "description",
+                                    "description vacio"))
 
 
 def check_broken_pointers(path, rel, text, findings):
@@ -174,11 +185,27 @@ def main():
     args = ap.parse_args()
 
     repo_root = Path(__file__).resolve().parent.parent
-    roots = [Path(p) for p in args.paths] if args.paths else [repo_root]
+    # El kit se compone de dos repos: el de skills (biblioteca) y el de tooling.
+    # Por defecto se escanean los dos, para que la genericidad se verifique
+    # sobre el producto completo y no solo sobre una parte.
+    sibling_skills = repo_root.parent / "dev-agent-skills"
+    if args.paths:
+        roots = [Path(p) for p in args.paths]
+    else:
+        roots = [repo_root]
+        if sibling_skills.is_dir():
+            roots.append(sibling_skills)
+
     findings = []
     scanned = 0
     for path in iter_files(roots):
-        rel = str(path.relative_to(repo_root)) if str(path).startswith(str(repo_root)) else str(path)
+        try:
+            rel = str(path.relative_to(repo_root))
+        except ValueError:
+            try:
+                rel = "../" + str(path.relative_to(sibling_skills))
+            except ValueError:
+                rel = str(path)
         try:
             text = path.read_text(encoding="utf-8", errors="replace")
         except Exception as exc:  # noqa: BLE001

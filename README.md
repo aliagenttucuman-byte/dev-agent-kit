@@ -70,8 +70,11 @@ La regla que hace que esto funcione: **CAPA 1 nunca menciona nada de CAPA 3.**
 ## Instalacion
 
 ```bash
-./scripts/install.sh --target ~/.hermes/skills --profile minimal
+./scripts/install.sh --target <SKILLS_DIR> --profile minimal
 ```
+
+`<SKILLS_DIR>` es el directorio donde el runtime lee las skills (por ejemplo
+`~/.hermes/skills` en Hermes, `~/.claude/skills` en Claude Code).
 
 Perfiles disponibles:
 
