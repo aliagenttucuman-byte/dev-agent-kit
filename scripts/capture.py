@@ -77,7 +77,7 @@ def redact_forbidden(text: str) -> tuple[str, bool]:
 
         new_out, n = pattern.subn(_sub, out)
         if n:
-            # Si el match es parte de un termino permitido (ej: "Cosmos DB"), se revierte.
+            # Si el match es parte de un termino permitido (ej: "NombreProducto DB"), se revierte.
             tail_ok = any(new_out[m.end():].startswith(a) for a in allowlist)
             if not tail_ok:
                 flagged = True

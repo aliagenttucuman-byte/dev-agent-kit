@@ -17,7 +17,7 @@ Reglas de match:
   - case_sensitive=True   -> se busca con mayusculas exactas (token ambiguo:
                               para no romper palabras inglesas legitimas)
   - allowlist             -> si el match esta seguido de uno de estos strings,
-                              el match se ignora (ej: "Cosmos DB")
+                              el match se ignora (ej: "NombreProducto DB")
 
 Ademas, se puede cargar una denylist PRIVADA (no versionada) desde:
   1. la variable de entorno DEVKIT_DENYLIST
